@@ -18,11 +18,7 @@ export default function MenuPage() {
         setError(null)
 
         const response = await fetch("/api/product")
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch products")
-        }
-
+        if (!response.ok) throw new Error("Failed to fetch products")
         const data = await response.json()
 
         const transformedProducts: MenuItem[] = data.map((product: any) => ({
@@ -38,7 +34,7 @@ export default function MenuPage() {
 
         setProducts(transformedProducts)
       } catch (err) {
-        console.error("Error fetching products:", err)
+        console.error(err)
         setError(err instanceof Error ? err.message : "Failed to fetch products")
         setProducts([])
       } finally {
@@ -49,10 +45,8 @@ export default function MenuPage() {
     fetchProducts()
   }, [])
 
-  const categories = ["All", ...Array.from(new Set(products.map((product) => product.category)))]
-
-  const filteredProducts =
-    selectedCategory === "All" ? products : products.filter((product) => product.category === selectedCategory)
+  const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))]
+  const filtered = selectedCategory === "All" ? products : products.filter((p) => p.category === selectedCategory)
 
   if (loading) {
     return (
@@ -79,13 +73,11 @@ export default function MenuPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-900 via-orange-800 to-amber-700 p-4">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">Korean Menu</h1>
           <p className="text-white/90 text-lg md:text-xl">Authentic Korean flavors delivered fresh</p>
         </div>
 
-        {/* Category Filter */}
         <div className="flex flex-wrap justify-center gap-2 mb-8">
           {categories.map((category) => (
             <Button
@@ -103,8 +95,7 @@ export default function MenuPage() {
           ))}
         </div>
 
-        {/* Products Grid */}
-        {filteredProducts.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-white/80 text-lg">
               {selectedCategory === "All"
@@ -113,9 +104,11 @@ export default function MenuPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <MenuItemCard key={product.id} item={product} />
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+            {filtered.map((product) => (
+              <div key={product.id} className="h-full flex flex-col">
+                <MenuItemCard item={product} />
+              </div>
             ))}
           </div>
         )}

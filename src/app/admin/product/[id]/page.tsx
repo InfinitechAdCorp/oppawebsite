@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Loader2, Upload, Flame, Leaf, Save } from "lucide-react"
+import { ArrowLeft, Loader2, Upload, Flame, Leaf, Save, Star } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -25,6 +25,7 @@ interface Product {
   category: string
   is_spicy?: boolean
   is_vegetarian?: boolean
+  is_featured?: boolean
   created_at: string
   updated_at: string
 }
@@ -75,6 +76,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     category: "",
     is_spicy: false,
     is_vegetarian: false,
+    is_featured: false,
   })
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -109,6 +111,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
           category: productData.category || "",
           is_spicy: productData.is_spicy || false,
           is_vegetarian: productData.is_vegetarian || false,
+          is_featured: productData.is_featured || false,
         })
       } catch (error) {
         console.error("Failed to fetch product:", error)
@@ -117,7 +120,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
           title: "Error",
           description: "Failed to load product details",
         })
-        router.push("/admin/products")
+        router.push("/admin/product")
       } finally {
         setLoading(false)
       }
@@ -168,6 +171,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       formDataToSend.append("category", formData.category)
       formDataToSend.append("is_spicy", formData.is_spicy.toString())
       formDataToSend.append("is_vegetarian", formData.is_vegetarian.toString())
+      formDataToSend.append("is_featured", formData.is_featured.toString())
 
       if (selectedImage) {
         formDataToSend.append("image", selectedImage)
@@ -191,7 +195,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
         description: "Product updated successfully!",
       })
 
-      router.push("/admin/products")
+      router.push("/admin/product")
     } catch (error: any) {
       console.error("Error updating product:", error)
       toast({
@@ -232,7 +236,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
               <div className="text-center bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg">
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">Product not found</h2>
                 <Button
-                  onClick={() => router.push("/admin/products")}
+                  onClick={() => router.push("/admin/product")}
                   className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold shadow-lg"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
@@ -266,7 +270,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => router.push("/admin/products")}
+                    onClick={() => router.push("/admin/product")}
                     className="shrink-0 hover:bg-orange-100 text-orange-600"
                   >
                     <ArrowLeft className="mr-2 h-4 w-4" />
@@ -285,8 +289,13 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 <CardHeader className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-t-lg">
                   <CardTitle className="flex items-center gap-2 text-xl font-bold">
                     <span>Product Details</span>
-                    {(formData.is_spicy || formData.is_vegetarian) && (
+                    {(formData.is_spicy || formData.is_vegetarian || formData.is_featured) && (
                       <div className="flex gap-1 ml-auto">
+                        {formData.is_featured && (
+                          <div className="bg-white/20 rounded-full p-1">
+                            <Star className="w-4 h-4 text-white" />
+                          </div>
+                        )}
                         {formData.is_spicy && (
                           <div className="bg-white/20 rounded-full p-1">
                             <Flame className="w-4 h-4 text-white" />
@@ -421,7 +430,23 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
 
                         <div className="space-y-4">
                           <Label className="text-base font-medium text-gray-700">Properties</Label>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="flex items-center space-x-3 p-3 border-2 border-orange-200 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100 transition-all duration-200">
+                              <Switch
+                                id="is_featured"
+                                checked={formData.is_featured}
+                                onCheckedChange={(checked) => handleSwitchChange("is_featured", checked)}
+                                disabled={saving}
+                              />
+                              <Label
+                                htmlFor="is_featured"
+                                className="flex items-center gap-2 cursor-pointer text-gray-700 font-medium"
+                              >
+                                <Star className="w-4 h-4 text-yellow-500" />
+                                Featured
+                              </Label>
+                            </div>
+
                             <div className="flex items-center space-x-3 p-3 border-2 border-orange-200 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100 transition-all duration-200">
                               <Switch
                                 id="is_spicy"
@@ -462,7 +487,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => router.push("/admin/products")}
+                        onClick={() => router.push("/admin/product")}
                         disabled={saving}
                         className="w-full sm:w-auto order-2 sm:order-1 border-orange-300 text-orange-600 hover:bg-orange-50"
                       >

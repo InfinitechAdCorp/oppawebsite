@@ -54,6 +54,7 @@ export interface Order {
   created_at: string
   updated_at: string
   order_items?: OrderItem[]
+  isFeatured?: boolean;
 }
 
 export interface ApiResponse<T = any> {
@@ -95,6 +96,7 @@ export interface MenuItem {
   isVegetarian?: boolean
   is_spicy?: boolean
   is_vegetarian?: boolean
+  isFeatured?: boolean;
 }
 
 export interface CartItem extends MenuItem {

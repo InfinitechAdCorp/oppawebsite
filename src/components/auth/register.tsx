@@ -305,7 +305,7 @@ export default function RegisterPage() {
           </Card>
         </div>
       </div>
-      <Toaster position="top-right" richColors />
+      <Toaster />
     </>
   )
 }

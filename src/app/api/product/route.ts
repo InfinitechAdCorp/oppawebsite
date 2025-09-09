@@ -3,9 +3,21 @@ import { NextRequest, NextResponse } from 'next/server'
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 // GET - Fetch all products
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/products`, {
+    const { searchParams } = new URL(request.url)
+    
+    // Build query parameters
+    const queryParams = new URLSearchParams()
+    
+    // Add all search parameters to the Laravel API call
+    searchParams.forEach((value, key) => {
+      queryParams.append(key, value)
+    })
+    
+    const apiUrl = `${API_BASE_URL}/api/products${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    
+    const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -50,16 +62,18 @@ export async function POST(request: NextRequest) {
     const description = formData.get('description') as string
     const price = formData.get('price') as string
     const category = formData.get('category') as string
-    const isSpicy = formData.get('isSpicy') as string
-    const isVegetarian = formData.get('isVegetarian') as string
+    const isSpicy = formData.get('is_spicy') as string
+    const isVegetarian = formData.get('is_vegetarian') as string
+    const isFeatured = formData.get('is_featured') as string
     const image = formData.get('image') as File
     
     laravelFormData.append('name', name)
     laravelFormData.append('description', description)
     laravelFormData.append('price', price)
     laravelFormData.append('category', category)
-    laravelFormData.append('is_spicy', isSpicy === 'true' ? '1' : '0')
-    laravelFormData.append('is_vegetarian', isVegetarian === 'true' ? '1' : '0')
+    laravelFormData.append('is_spicy', isSpicy ? '1' : '0')
+    laravelFormData.append('is_vegetarian', isVegetarian ? '1' : '0')
+    laravelFormData.append('is_featured', isFeatured ? '1' : '0')
     
     if (image && image.size > 0) {
       laravelFormData.append('image', image)

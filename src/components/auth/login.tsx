@@ -1,80 +1,104 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Toaster } from "@/components/ui/sonner"
-import { toast } from "sonner"
+import type React from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";  // Only keep this import
+import { Toaster } from "@/components/ui/toaster";  // Keep only this Toaster import
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const router = useRouter()
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!formData.email || !formData.password) {
       toast.error("Missing Information 정보 누락", {
         description: "Please fill in all required fields. 필수 항목을 모두 입력해 주세요.",
-      })
-      return
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
         // Store token and user data
-        localStorage.setItem('auth_token', data.data.token)
-        localStorage.setItem('user_data', JSON.stringify(data.data.user))
+        // Handle different possible response structures from Laravel
+        const token = data.token || data.data?.token || data.access_token;
+        const user = data.user || data.data?.user || data.data;
+
+        if (token) {
+          localStorage.setItem("auth_token", token);
+        }
+
+        if (user) {
+          localStorage.setItem("user_data", JSON.stringify(user));
+        }
+
+        // Dispatch custom event to notify other components about user data update
+        window.dispatchEvent(new CustomEvent("userDataUpdated"));
 
         toast.success("Login Successful! 로그인 성공!", {
           description: "Welcome back to OPPA Restaurant! 다시 오신 것을 환영합니다!",
-        })
+        });
 
-        // Small delay before redirect for user to see success message
+        const userRole = user?.role?.toLowerCase?.() || user?.role || "";
+        const isAdmin = userRole === "admin";
+        const isCustomer = userRole === "customer" || userRole === "user";
+
+        let redirectPath = "/";
+        if (isAdmin) {
+          redirectPath = "/admin/dashboard";
+        } else if (isCustomer) {
+          redirectPath = "/";
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         setTimeout(() => {
-          router.push('/')
-        }, 2000)
+          router.push(redirectPath);
+        }, 1500);
       } else {
         toast.error("Login Failed 로그인 실패", {
           description: data.message || "Login failed. Please try again. 로그인에 실패했습니다.",
-        })
+        });
       }
     } catch (error) {
-      console.error('Login error:', error)
+      console.error("Login error:", error);
       toast.error("Connection Error 연결 오류", {
         description: "Unable to login. Please check your connection and try again. 연결을 확인하고 다시 시도해 주세요.",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <>
@@ -89,11 +113,10 @@ export default function LoginPage() {
         <div className="container mx-auto px-4 relative z-10 flex items-center justify-center min-h-screen">
           <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm border-orange-200/50 shadow-lg">
             <CardHeader className="text-center">
-              <CardTitle className="text-3xl text-gray-800 mb-2">
-                OPPA Restaurant
-              </CardTitle>
+              <CardTitle className="text-3xl text-gray-800 mb-2">OPPA Restaurant</CardTitle>
               <h2 className="text-2xl text-gray-800">
-                로그인 <span className="text-transparent bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text">Login</span>
+                로그인{" "}
+                <span className="text-transparent bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text">Login</span>
               </h2>
               <p className="text-gray-600 mt-2">Welcome back! 다시 오신 것을 환영합니다!</p>
             </CardHeader>
@@ -145,26 +168,34 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 h-14 shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  style={{
+                    background: "linear-gradient(to right, #f97316, #ef4444) !important",
+                    color: "#ffffff !important",
+                    opacity: "1 !important",
+                  }}
                   size="lg"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-2" style={{ color: "#ffffff !important" }}>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      Logging in... 로그인 중...
+                      <span style={{ color: "#ffffff !important" }}>Logging in... 로그인 중...</span>
                     </span>
                   ) : (
-                    <>
-                      <LogIn className="w-4 h-4 mr-2" />
-                      로그인 Login
-                    </>
+                    <span className="flex items-center" style={{ color: "#ffffff !important" }}>
+                      <LogIn className="w-4 h-4 mr-2" style={{ color: "#ffffff !important" }} />
+                      <span style={{ color: "#ffffff !important" }}>로그인 Login</span>
+                    </span>
                   )}
                 </Button>
 
                 <div className="text-center pt-4">
                   <p className="text-gray-600">
                     Don't have an account? 계정이 없으신가요?{" "}
-                    <Link href="/register" className="text-orange-600 hover:text-orange-700 font-semibold transition-colors">
+                    <Link
+                      href="/register"
+                      className="text-orange-600 hover:text-orange-700 font-semibold transition-colors"
+                    >
                       Register here 회원가입
                     </Link>
                   </p>
@@ -174,7 +205,9 @@ export default function LoginPage() {
           </Card>
         </div>
       </div>
-      <Toaster position="top-right" richColors />
+
+      {/* Only one Toaster here for consistent display */}
+      <Toaster />
     </>
-  )
+  );
 }

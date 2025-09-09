@@ -36,7 +36,7 @@ import { usePathname, useRouter } from "next/navigation"
 const items = [
   {
     title: "Dashboard",
-    url: "/admin",
+    url: "/admin/dashboard",
     icon: Home,
     color: "text-orange-600",
     bgColor: "hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50",

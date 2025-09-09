@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useCallback } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
-import { Menu, ShoppingCart, LogOut } from "lucide-react"
+import { Menu, ShoppingCart, LogOut, Download, User, Home, UtensilsCrossed, Info, Phone } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
 
 const Header = () => {
@@ -15,38 +16,106 @@ const Header = () => {
   const router = useRouter()
   const { getItemCount } = useCartStore()
   const itemCount = getItemCount()
-
   const [user, setUser] = useState<{ name?: string; email?: string } | null>(null)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [showInstallButton, setShowInstallButton] = useState(false)
 
-  // Don't render header on admin pages
-  if (pathname.startsWith('/admin')) {
-    return null
-  }
-
-  // Load user info from localStorage
   useEffect(() => {
-    const storedUser = localStorage.getItem("user_data")
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch {
-        setUser(null)
-      }
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+      setShowInstallButton(true)
+    }
+
+    const handleAppInstalled = () => {
+      setShowInstallButton(false)
+      setDeferredPrompt(null)
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+    window.addEventListener("appinstalled", handleAppInstalled)
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+      window.removeEventListener("appinstalled", handleAppInstalled)
     }
   }, [])
 
+  const handleInstallApp = async () => {
+    if (!deferredPrompt) return
+
+    deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+
+    if (outcome === "accepted") {
+      setShowInstallButton(false)
+    }
+
+    setDeferredPrompt(null)
+  }
+
+  const loadUserFromStorage = useCallback(() => {
+    try {
+      const storedUser = localStorage.getItem("user_data")
+      const storedToken = localStorage.getItem("auth_token")
+
+      if (storedUser && storedToken) {
+        const parsedUser = JSON.parse(storedUser)
+        setUser(parsedUser)
+        console.log("[Header] User loaded from storage:", parsedUser)
+      } else {
+        setUser(null)
+        console.log("[Header] No user data or token found")
+      }
+    } catch (error) {
+      console.error("[Header] Error loading user from storage:", error)
+      setUser(null)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadUserFromStorage()
+
+    const handleUserUpdate = () => {
+      console.log("[Header] User update event received")
+      loadUserFromStorage()
+    }
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "user_data" || e.key === "auth_token") {
+        console.log("[Header] Storage change detected for:", e.key)
+        loadUserFromStorage()
+      }
+    }
+
+    window.addEventListener("userDataUpdated", handleUserUpdate)
+    window.addEventListener("storage", handleStorageChange)
+
+    return () => {
+      window.removeEventListener("userDataUpdated", handleUserUpdate)
+      window.removeEventListener("storage", handleStorageChange)
+    }
+  }, [loadUserFromStorage])
+
+  // Early return after hooks to preserve hook order
+  if (pathname.startsWith("/admin")) {
+    return null
+  }
+
   const handleLogout = () => {
+    console.log("[Header] Logging out user")
     localStorage.removeItem("auth_token")
     localStorage.removeItem("user_data")
     setUser(null)
+    window.dispatchEvent(new CustomEvent("userDataUpdated"))
     router.push("/login")
   }
 
   const navigation = [
-    { name: "Home", href: "/" },
-    { name: "Menu", href: "/menu" },
-    { name: "About Us", href: "/about" },
-    { name: "Contact", href: "/contact" },
+    { name: "Home", href: "/", icon: Home },
+    { name: "Menu", href: "/menu", icon: UtensilsCrossed },
+    { name: "About", href: "/about", icon: Info },
+    { name: "Contact", href: "/contact", icon: Phone },
   ]
 
   const isActivePage = (href: string) => {
@@ -57,74 +126,73 @@ const Header = () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 relative overflow-hidden">
-      {/* Background / Effects */}
-      <div className="absolute inset-0 bg-white">
-        <div className="absolute top-2 left-10 w-16 h-16 bg-orange-200/40 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute top-8 right-20 w-12 h-12 bg-red-200/50 rounded-full blur-lg animate-pulse delay-300"></div>
+    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/95 border-b border-red-100 shadow-sm">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-r from-red-50/50 via-orange-50/30 to-red-50/50">
+        <div className="absolute top-1 left-4 w-12 h-12 bg-gradient-to-br from-red-200/40 to-orange-200/30 rounded-full blur-xl opacity-60"></div>
+        <div className="absolute top-2 right-8 w-8 h-8 bg-gradient-to-br from-orange-200/40 to-red-200/30 rounded-full blur-lg opacity-50"></div>
       </div>
-      <div className="absolute inset-0 border-b border-orange-200/30"></div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3">
-            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl border border-orange-300 shadow-lg">
-              <span className="text-white font-bold text-xl drop-shadow-lg">오</span>
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 relative z-10">
+        <div className="flex items-center justify-between h-12 sm:h-14 md:h-16">
+          {/* Logo - More compact for mobile */}
+          <Link href="/" className="flex items-center space-x-2 group">
+            <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-red-500 via-red-600 to-orange-500 rounded-lg border border-red-300/50 shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
+              <span className="text-white font-bold text-sm sm:text-base md:text-lg drop-shadow-sm">오</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-gray-800">OPPA Restaurant</span>
-              <span className="text-xs text-orange-600 font-medium">한국 요리</span>
+              <span className="text-sm sm:text-base md:text-lg font-bold text-gray-800 leading-tight">OPPA</span>
+              <span className="text-xs text-red-500 font-medium -mt-0.5 hidden sm:block">Korean Cuisine</span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-2">
+          <nav className="hidden lg:flex items-center space-x-1">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg border ${
+                className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg transform hover:scale-105 ${
                   isActivePage(item.href)
-                    ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg border-orange-300"
-                    : "text-gray-700 hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-500 hover:text-white border-orange-200 hover:border-orange-300"
+                    ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md"
+                    : "text-gray-700 hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-500 hover:text-white hover:shadow-md"
                 }`}
               >
-                {item.name}
+                <item.icon className="h-4 w-4" />
+                <span>{item.name}</span>
               </Link>
             ))}
           </nav>
 
-          {/* Cart + User + Mobile Menu */}
-          <div className="flex items-center space-x-4">
-            {/* Cart */}
-            <Link href="/cart">
+          {/* Right side actions */}
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            {/* Install button - hidden on mobile to save space */}
+            {showInstallButton && (
               <Button
                 variant="outline"
                 size="sm"
-                className="relative bg-gradient-to-r from-red-500 to-orange-500 border-orange-300 text-white hover:from-red-600 hover:to-orange-600 transition-all duration-300"
+                onClick={handleInstallApp}
+                className="hidden md:flex items-center space-x-1 border-green-300 text-green-600 hover:bg-green-50 bg-transparent text-xs"
               >
-                <ShoppingCart className="h-4 w-4" />
-                {itemCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 px-1 min-w-[20px] h-5 flex items-center justify-center text-xs bg-red-600 border-2 border-white shadow-lg animate-pulse">
-                    {itemCount}
-                  </Badge>
-                )}
+                <Download className="h-3 w-3" />
+                <span className="hidden lg:inline text-xs">Install</span>
               </Button>
-            </Link>
+            )}
 
-            {/* User Info (right side of cart) */}
+            {/* User info - compact for mobile */}
             {user ? (
               <div className="hidden md:flex items-center space-x-2">
-                <span className="text-sm font-semibold text-gray-700">👋 {user.name}</span>
+                <div className="flex items-center space-x-1 px-2 py-1 bg-gray-50 rounded-lg border">
+                  <User className="h-3 w-3 text-gray-600" />
+                  <span className="text-xs font-medium text-gray-700 max-w-20 truncate">{user.name}</span>
+                </div>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={handleLogout}
-                  className="flex items-center space-x-1 border-red-300 text-red-600 hover:bg-red-50"
+                  className="p-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
                   <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
                 </Button>
               </div>
             ) : (
@@ -132,46 +200,135 @@ const Header = () => {
                 <Button
                   variant="default"
                   size="sm"
-                  className="bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md"
+                  className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs px-3 py-1.5 h-8"
                 >
                   Login
                 </Button>
               </Link>
             )}
 
-            {/* Mobile Menu */}
+            {/* Cart - more prominent */}
+            <Link href="/cart">
+              <Button
+                variant="outline"
+                size="sm"
+                className="relative bg-gradient-to-r from-red-500 to-orange-500 border-red-300 text-white hover:from-red-600 hover:to-orange-600 transition-all duration-300 shadow-sm hover:shadow-md p-2"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                {itemCount > 0 && (
+                  <Badge className="absolute -top-2 -right-2 px-1.5 min-w-[18px] h-5 flex items-center justify-center text-xs bg-white text-red-600 border-2 border-red-500 shadow-md animate-pulse font-bold">
+                    {itemCount}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
+
+            {/* Mobile Menu - more prominent */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className="md:hidden bg-gradient-to-r from-red-500 to-orange-500 text-white"
+                  className="lg:hidden bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 p-2"
                 >
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-gradient-to-br from-red-600 via-orange-500 to-red-500">
-                <div className="flex flex-col space-y-6 mt-6">
-                  <nav className="flex flex-col space-y-3">
-                    {navigation.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        onClick={() => setIsOpen(false)}
-                        className={`text-base font-medium py-3 px-4 rounded-lg transition-all duration-300 ${
-                          isActivePage(item.href)
-                            ? "bg-white/30 text-white shadow-lg"
-                            : "text-white/90 hover:bg-white/20 hover:text-white"
-                        }`}
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
+              <SheetContent side="right" className="w-[300px] bg-white border-l border-gray-200">
+                <div className="flex flex-col h-full py-4">
+                  {/* Header in mobile menu */}
+                  <div className="flex items-center space-x-3 pb-6 border-b border-gray-100">
+                    <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-red-500 via-red-600 to-orange-500 rounded-lg shadow-md">
+                      <span className="text-white font-bold text-lg">오</span>
+                    </div>
+                    <div>
+                      <h2 className="font-bold text-gray-800">OPPA Restaurant</h2>
+                      <p className="text-sm text-red-500">Korean Cuisine</p>
+                    </div>
+                  </div>
 
-                    {/* Auth (mobile) */}
+                  {/* Navigation - Remove flex-1 to prevent stretching */}
+                  <nav className="py-4">
+                    <div className="space-y-2">
+                      {navigation.map((item) => (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          onClick={() => setIsOpen(false)}
+                          className={`flex items-center space-x-3 w-full text-left px-4 py-4 text-base font-medium rounded-lg transition-all duration-300 ${
+                            isActivePage(item.href)
+                              ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md"
+                              : "text-gray-700 hover:bg-gray-50 hover:text-red-600"
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span>{item.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </nav>
+
+                  {/* Quick Actions Section */}
+                  <div className="py-4 border-t border-gray-100">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3 px-4">Quick Actions</h3>
+                    <div className="space-y-2">
+                      <Link href="/cart" onClick={() => setIsOpen(false)}>
+                        <div className="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                          <div className="flex items-center space-x-3">
+                            <ShoppingCart className="h-5 w-5" />
+                            <span className="font-medium">View Cart</span>
+                          </div>
+                          {itemCount > 0 && (
+                            <Badge className="bg-red-500 text-white px-2 py-1 text-xs">{itemCount}</Badge>
+                          )}
+                        </div>
+                      </Link>
+
+                      {showInstallButton && (
+                        <button
+                          onClick={() => {
+                            handleInstallApp()
+                            setIsOpen(false)
+                          }}
+                          className="flex items-center space-x-3 w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <Download className="h-5 w-5" />
+                          <span className="font-medium">Install App</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Restaurant Info Section */}
+                  <div className="py-4 border-t border-gray-100">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3 px-4">Restaurant Info</h3>
+                    <div className="space-y-3 px-4">
+                      <div className="flex items-center space-x-3 text-sm text-gray-600">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span>Open 24 Hours</span>
+                      </div>
+                      <div className="flex items-center space-x-3 text-sm text-gray-600">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span>Free delivery over ₱300.00</span>
+                      </div>
+                      <div className="flex items-center space-x-3 text-sm text-gray-600">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                        <span>Authentic Korean cuisine</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* User section */}
+                  <div className="mt-auto border-t border-gray-100 pt-4">
                     {user ? (
-                      <div className="flex flex-col space-y-3 mt-4">
-                        <span className="text-white text-sm">👋 {user.name}</span>
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-lg">
+                          <User className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-800">Hello, {user.name}!</p>
+                            <p className="text-xs text-gray-500">{user.email}</p>
+                          </div>
+                        </div>
                         <Button
                           variant="outline"
                           size="sm"
@@ -179,7 +336,7 @@ const Header = () => {
                             handleLogout()
                             setIsOpen(false)
                           }}
-                          className="flex items-center space-x-1 border-white/50 text-white hover:bg-white/20"
+                          className="flex items-center justify-center space-x-2 w-full border-red-300 text-red-600 hover:bg-red-50 py-3"
                         >
                           <LogOut className="h-4 w-4" />
                           <span>Logout</span>
@@ -190,13 +347,13 @@ const Header = () => {
                         <Button
                           variant="default"
                           size="sm"
-                          className="w-full bg-white text-red-600 hover:bg-white/90"
+                          className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white py-3 font-semibold"
                         >
                           Login
                         </Button>
                       </Link>
                     )}
-                  </nav>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>

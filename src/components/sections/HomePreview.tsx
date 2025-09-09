@@ -15,13 +15,13 @@ export default function HomePreview() {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Text Section */}
           <div className="space-y-8">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-lg font-medium text-red-600 tracking-wide">AUTHENTIC KOREAN CUISINE</span>
             </div>
 
             <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-             
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500">
                 OPPA Restaurant
               </span>
@@ -60,46 +60,49 @@ export default function HomePreview() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <Card className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white/80 backdrop-blur-sm border-red-100">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Flame className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-gray-800">Authentic Flavors</h3>
-                <p className="text-sm text-gray-600">Traditional Korean recipes from Seoul</p>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 mt-8 bg-white/80 backdrop-blur-sm border-orange-100">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Heart className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-gray-800">Made with Love</h3>
-                <p className="text-sm text-gray-600">Every dish crafted with Korean heart</p>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white/80 backdrop-blur-sm border-yellow-100">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-red-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Users className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-gray-800">Family Atmosphere</h3>
-                <p className="text-sm text-gray-600">Warm Korean hospitality & community</p>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 mt-8 bg-white/80 backdrop-blur-sm border-red-100">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Award className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-gray-800">Award Winning</h3>
-                <p className="text-sm text-gray-600">Best Korean restaurant 3 years running</p>
-              </CardContent>
-            </Card>
+          {/* Cards Section */}
+          <div className="grid grid-cols-2 gap-6 auto-rows-fr">
+            {[
+              {
+                icon: <Flame className="w-8 h-8 text-white" />,
+                title: "Authentic Flavors",
+                desc: "Traditional Korean recipes from Seoul",
+                bg: "from-red-500 to-orange-400",
+              },
+              {
+                icon: <Heart className="w-8 h-8 text-white" />,
+                title: "Made with Love",
+                desc: "Every dish crafted with Korean heart",
+                bg: "from-orange-500 to-yellow-400",
+              },
+              {
+                icon: <Users className="w-8 h-8 text-white" />,
+                title: "Family Atmosphere",
+                desc: "Warm Korean hospitality & community",
+                bg: "from-yellow-500 to-red-400",
+              },
+              {
+                icon: <Award className="w-8 h-8 text-white" />,
+                title: "Award Winning",
+                desc: "Best Korean restaurant 3 years running",
+                bg: "from-red-500 to-pink-400",
+              },
+            ].map((card, idx) => (
+              <Card
+                key={idx}
+                className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white/80 backdrop-blur-sm border border-red-100 h-full flex flex-col"
+              >
+                <CardContent className="p-8 text-center flex flex-col flex-1">
+                  <div
+                    className={`w-16 h-16 bg-gradient-to-br ${card.bg} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}
+                  >
+                    {card.icon}
+                  </div>
+                  <h3 className="font-bold text-lg mb-2 text-gray-800">{card.title}</h3>
+                  <p className="text-sm text-gray-600 flex-1">{card.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </div>

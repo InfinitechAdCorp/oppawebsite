@@ -54,6 +54,7 @@ export async function POST(
     const category = formData.get('category') as string
     const isSpicy = formData.get('is_spicy') as string
     const isVegetarian = formData.get('is_vegetarian') as string
+    const isFeatured = formData.get('is_featured') as string
     const image = formData.get('image') as File
     const method = formData.get('_method') as string
     
@@ -63,6 +64,7 @@ export async function POST(
     laravelFormData.append('category', category)
     laravelFormData.append('is_spicy', isSpicy === 'true' ? '1' : '0')
     laravelFormData.append('is_vegetarian', isVegetarian === 'true' ? '1' : '0')
+    laravelFormData.append('is_featured', isFeatured === 'true' ? '1' : '0')
     laravelFormData.append('_method', method || 'PUT')
     
     if (image && image.size > 0) {

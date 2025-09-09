@@ -12,25 +12,26 @@ const About = () => {
         <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-gradient-to-r from-orange-400/20 to-red-400/20 rounded-full blur-xl animate-pulse delay-500"></div>
 
         {/* Korean pattern overlay */}
-        
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <div className="flex items-center justify-center gap-4 mb-6">
-            
             <span className="text-red-600 font-medium text-lg">한국 요리</span>
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
             About{" "}
-            <span className="bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">OPPA</span>{" "}
+            <span className="bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
+              OPPA
+            </span>{" "}
             Restaurant
           </h1>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-            Welcome to OPPA Restaurant, where authentic Korean flavors meet modern dining. Our passion for Korean
-            cuisine drives us to bring you the most delicious and traditional dishes with a contemporary twist.
+            Welcome to OPPA Restaurant, where authentic Korean flavors meet modern
+            dining. Our passion for Korean cuisine drives us to bring you the most
+            delicious and traditional dishes with a contemporary twist.
           </p>
         </div>
 
@@ -42,51 +43,70 @@ const About = () => {
             </h2>
             <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
               <p>
-                Founded in 2018, OPPA Restaurant began as a small family dream to share the authentic flavors of Korea
-                with our community. What started as a humble kitchen has grown into a beloved dining destination for
+                Founded in 2018, OPPA Restaurant began as a small family dream to
+                share the authentic flavors of Korea with our community. What started
+                as a humble kitchen has grown into a beloved dining destination for
                 Korean food enthusiasts.
               </p>
               <p>
-                Our name "OPPA" represents the warm, familial feeling we want every guest to experience - like being
-                welcomed into a Korean family home where food is prepared with love and served with pride.
+                Our name "OPPA" represents the warm, familial feeling we want every
+                guest to experience - like being welcomed into a Korean family home
+                where food is prepared with love and served with pride.
               </p>
               <p>
-                Every dish on our menu tells a story of Korean culinary heritage, passed down through generations and
-                perfected by our dedicated chefs who trained in Seoul and bring authentic techniques to every meal.
+                Every dish on our menu tells a story of Korean culinary heritage,
+                passed down through generations and perfected by our dedicated chefs
+                who trained in Seoul and bring authentic techniques to every meal.
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Card className="group hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-white/70 border-red-100 hover:border-red-200">
-              <CardContent className="p-6 text-center">
-                <Heart className="w-12 h-12 text-red-500 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="font-semibold text-lg mb-2 text-gray-800">Made with Love</h3>
-                <p className="text-sm text-gray-600">Every dish is prepared with passion and care</p>
+            <Card className="group hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-white/70 border-red-100 hover:border-red-200 h-[320px]">
+              <CardContent className="p-6 flex flex-col justify-center items-center text-center h-full">
+                <Heart className="w-12 h-12 text-red-500 mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-semibold text-lg mb-2 text-gray-800 leading-tight">
+                  Made with Love
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed max-w-[180px]">
+                  Every dish is prepared with passion and care
+                </p>
               </CardContent>
             </Card>
 
-            <Card className="group hover:shadow-2xl transition-all duration-300 mt-8 backdrop-blur-sm bg-white/70 border-orange-100 hover:border-orange-200">
-              <CardContent className="p-6 text-center">
-                <Award className="w-12 h-12 text-orange-500 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="font-semibold text-lg mb-2 text-gray-800">Award Winning</h3>
-                <p className="text-sm text-gray-600">Recognized for authentic Korean cuisine</p>
+            <Card className="group hover:shadow-2xl transition-all duration-300 mt-8 backdrop-blur-sm bg-white/70 border-orange-100 hover:border-orange-200 h-[320px]">
+              <CardContent className="p-6 flex flex-col justify-center items-center text-center h-full">
+                <Award className="w-12 h-12 text-orange-500 mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-semibold text-lg mb-2 text-gray-800 leading-tight">
+                  Award Winning
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed max-w-[180px]">
+                  Recognized for authentic Korean cuisine
+                </p>
               </CardContent>
             </Card>
 
-            <Card className="group hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-white/70 border-red-100 hover:border-red-200">
-              <CardContent className="p-6 text-center">
-                <Users className="w-12 h-12 text-red-600 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="font-semibold text-lg mb-2 text-gray-800">Family Owned</h3>
-                <p className="text-sm text-gray-600">Three generations of Korean cooking tradition</p>
+            <Card className="group hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-white/70 border-red-100 hover:border-red-200 h-[320px]">
+              <CardContent className="p-6 flex flex-col justify-center items-center text-center h-full">
+                <Users className="w-12 h-12 text-red-600 mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-semibold text-lg mb-2 text-gray-800 leading-tight">
+                  Family Owned
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed max-w-[180px]">
+                  Three generations of Korean cooking tradition
+                </p>
               </CardContent>
             </Card>
 
-            <Card className="group hover:shadow-2xl transition-all duration-300 mt-8 backdrop-blur-sm bg-white/70 border-orange-100 hover:border-orange-200">
-              <CardContent className="p-6 text-center">
-                <Clock className="w-12 h-12 text-orange-600 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="font-semibold text-lg mb-2 text-gray-800">6 Years</h3>
-                <p className="text-sm text-gray-600">Serving the community since 2018</p>
+            <Card className="group hover:shadow-2xl transition-all duration-300 mt-8 backdrop-blur-sm bg-white/70 border-orange-100 hover:border-orange-200 h-[320px]">
+              <CardContent className="p-6 flex flex-col justify-center items-center text-center h-full">
+                <Clock className="w-12 h-12 text-orange-600 mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-semibold text-lg mb-2 text-gray-800 leading-tight">
+                  6 Years
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed max-w-[180px]">
+                  Serving the community since 2018
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -99,8 +119,9 @@ const About = () => {
               Our Mission
             </h2>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-              To bring authentic Korean flavors to your table while creating a warm, welcoming atmosphere where every
-              meal becomes a memorable experience. We believe in preserving traditional Korean cooking methods while
+              To bring authentic Korean flavors to your table while creating a warm,
+              welcoming atmosphere where every meal becomes a memorable experience.
+              We believe in preserving traditional Korean cooking methods while
               embracing innovation to delight modern palates.
             </p>
           </div>
@@ -120,7 +141,8 @@ const About = () => {
                 <h3 className="font-semibold text-lg mb-2 text-gray-800">Chef Kim</h3>
                 <p className="text-red-600 font-medium mb-2">Head Chef</p>
                 <p className="text-sm text-gray-600">
-                  20 years of experience in Korean cuisine with training from Seoul's finest restaurants
+                  20 years of experience in Korean cuisine with training from Seoul's
+                  finest restaurants
                 </p>
               </CardContent>
             </Card>
@@ -133,7 +155,8 @@ const About = () => {
                 <h3 className="font-semibold text-lg mb-2 text-gray-800">Sarah Lee</h3>
                 <p className="text-orange-600 font-medium mb-2">Restaurant Manager</p>
                 <p className="text-sm text-gray-600">
-                  Ensures every guest feels welcomed and enjoys an exceptional dining experience
+                  Ensures every guest feels welcomed and enjoys an exceptional dining
+                  experience
                 </p>
               </CardContent>
             </Card>
@@ -163,25 +186,29 @@ const About = () => {
               <li className="flex items-start">
                 <span className="text-red-500 mr-2 text-xl">•</span>
                 <span>
-                  <strong>Authenticity:</strong> Using traditional Korean recipes and cooking methods
+                  <strong>Authenticity:</strong> Using traditional Korean recipes and
+                  cooking methods
                 </span>
               </li>
               <li className="flex items-start">
                 <span className="text-red-500 mr-2 text-xl">•</span>
                 <span>
-                  <strong>Quality:</strong> Sourcing the finest ingredients for every dish
+                  <strong>Quality:</strong> Sourcing the finest ingredients for every
+                  dish
                 </span>
               </li>
               <li className="flex items-start">
                 <span className="text-red-500 mr-2 text-xl">•</span>
                 <span>
-                  <strong>Community:</strong> Creating a welcoming space for all cultures to enjoy Korean food
+                  <strong>Community:</strong> Creating a welcoming space for all
+                  cultures to enjoy Korean food
                 </span>
               </li>
               <li className="flex items-start">
                 <span className="text-red-500 mr-2 text-xl">•</span>
                 <span>
-                  <strong>Innovation:</strong> Respecting tradition while embracing modern techniques
+                  <strong>Innovation:</strong> Respecting tradition while embracing
+                  modern techniques
                 </span>
               </li>
             </ul>

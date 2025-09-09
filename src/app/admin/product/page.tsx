@@ -22,6 +22,7 @@ import {
   Upload,
   Flame,
   Leaf,
+  Star,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -78,6 +79,7 @@ interface Product {
   category: string
   is_spicy?: boolean
   is_vegetarian?: boolean
+  is_featured?: boolean
   created_at: string
   updated_at: string
 }
@@ -149,6 +151,7 @@ export default function ProductsAdminPage() {
     category: "",
     is_spicy: false,
     is_vegetarian: false,
+    is_featured: false,
   })
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -202,6 +205,7 @@ export default function ProductsAdminPage() {
       formData.append("category", newFormData.category)
       formData.append("is_spicy", newFormData.is_spicy.toString())
       formData.append("is_vegetarian", newFormData.is_vegetarian.toString())
+      formData.append("is_featured", newFormData.is_featured.toString())
 
       if (selectedImage) {
         formData.append("image", selectedImage)
@@ -246,6 +250,7 @@ export default function ProductsAdminPage() {
       category: "",
       is_spicy: false,
       is_vegetarian: false,
+      is_featured: false,
     })
     setSelectedImage(null)
     setImagePreview(null)
@@ -401,6 +406,12 @@ export default function ProductsAdminPage() {
       header: "Properties",
       cell: ({ row }) => (
         <div className="flex gap-1 flex-wrap">
+          {row.original.is_featured && (
+            <Badge variant="secondary" className="text-xs px-1.5 py-0 bg-yellow-100 text-yellow-800">
+              <Star className="w-3 h-3 sm:mr-1" />
+              <span className="hidden sm:inline">Featured</span>
+            </Badge>
+          )}
           {row.original.is_spicy && (
             <Badge variant="destructive" className="text-xs px-1.5 py-0">
               <Flame className="w-3 h-3 sm:mr-1" />
@@ -498,6 +509,12 @@ export default function ProductsAdminPage() {
                           <div>
                             <Label className="text-sm font-medium text-gray-500">Properties</Label>
                             <div className="flex gap-2 mt-1 flex-wrap">
+                              {selectedProduct.is_featured && (
+                                <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
+                                  <Star className="w-3 h-3 mr-1" />
+                                  Featured
+                                </Badge>
+                              )}
                               {selectedProduct.is_spicy && (
                                 <Badge variant="destructive" className="text-xs">
                                   <Flame className="w-3 h-3 mr-1" />
@@ -510,7 +527,7 @@ export default function ProductsAdminPage() {
                                   Vegetarian
                                 </Badge>
                               )}
-                              {!selectedProduct.is_spicy && !selectedProduct.is_vegetarian && (
+                              {!selectedProduct.is_featured && !selectedProduct.is_spicy && !selectedProduct.is_vegetarian && (
                                 <span className="text-sm text-gray-500">None</span>
                               )}
                             </div>
@@ -818,7 +835,23 @@ export default function ProductsAdminPage() {
                                 )}
                               </div>
 
-                              <div className="grid grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="flex items-center space-x-2 p-3 border-2 border-orange-200 rounded-lg bg-white/50 hover:bg-white/70 transition-colors">
+                                  <Switch
+                                    id="is_featured"
+                                    checked={newFormData.is_featured}
+                                    onCheckedChange={(checked) => handleSwitchChange("is_featured", checked)}
+                                    disabled={isCreating}
+                                  />
+                                  <Label
+                                    htmlFor="is_featured"
+                                    className="flex items-center gap-2 cursor-pointer text-gray-700 font-medium"
+                                  >
+                                    <Star className="w-4 h-4 text-yellow-500" />
+                                    Featured
+                                  </Label>
+                                </div>
+
                                 <div className="flex items-center space-x-2 p-3 border-2 border-orange-200 rounded-lg bg-white/50 hover:bg-white/70 transition-colors">
                                   <Switch
                                     id="is_spicy"
